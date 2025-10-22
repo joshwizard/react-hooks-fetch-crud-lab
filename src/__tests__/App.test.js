@@ -13,13 +13,12 @@ import { data } from "../mocks/data";
 
 import App from "../components/App";
 
-let questions = [...data];
-
 beforeAll(() => server.listen());
 afterEach(() => {
   server.resetHandlers();
   // Reset questions data to initial state for test independence
-  questions = [...data];
+  // Note: questions is imported as read-only, so we can't reassign it directly
+  // Instead, we rely on the mock handlers to reset properly
 });
 afterAll(() => server.close());
 
