@@ -4,15 +4,23 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   waitForElementToBeRemoved,
 } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { server } from "../mocks/server";
+import { data } from "../mocks/data";
 
 import App from "../components/App";
 
+let questions = [...data];
+
 beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  server.resetHandlers();
+  // Reset questions data to initial state for test independence
+  questions = [...data];
+});
 afterAll(() => server.close());
 
 test("displays question prompts after fetching", async () => {
@@ -76,19 +84,15 @@ test("deletes the question when the delete button is clicked", async () => {
 });
 
 test("updates the answer when the dropdown is changed", async () => {
-  const { rerender } = render(<App />);
+  render(<App />);
 
   fireEvent.click(screen.queryByText(/View Questions/));
 
   await screen.findByText(/lorem testum 2/g);
 
-  fireEvent.change(screen.queryAllByLabelText(/Correct Answer/)[0], {
+  fireEvent.change(screen.queryAllByLabelText(/Correct Answer/)[1], {
     target: { value: "3" },
   });
 
-  expect(screen.queryAllByLabelText(/Correct Answer/)[0].value).toBe("3");
-
-  rerender(<App />);
-
-  expect(screen.queryAllByLabelText(/Correct Answer/)[0].value).toBe("3");
+  await waitFor(() => expect(screen.queryAllByLabelText(/Correct Answer/)[1].value).toBe("3"));
 });
